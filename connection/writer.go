@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"math/rand"
 	"reflect"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -364,6 +365,14 @@ func (s *writer) routine() {
 		if len(packets) > 0 {
 			for _, p := range packets {
 				if pack, ok := p.(*mqttp.Publish); ok {
+				case *mqttp.Publish:
+					topic := pack.Topic()
+					pos := strings.Index(topic, "/")
+					if pos != -1 {
+
+						topic = topic[pos+1:]
+						pack.SetTopic(topic)
+					}
 					if _, expireLeft, expired := pack.Expired(); expired {
 						continue
 					} else {
@@ -460,10 +469,10 @@ func (s *writer) packetFitsSize(value interface{}) bool {
 		s.log.Fatal("Object does not belong to allowed types",
 			zap.String("ClientID", s.id),
 			zap.String("Type", reflect.TypeOf(value).String()))
-	} else if sz, err = obj.Size(); err != nil {
-		s.log.Error("Couldn't calculate message size", zap.String("ClientID", s.id), zap.Error(err))
-		return false
-	}
+			} else if sz, err = obj.Size(); err != nil {
+				s.log.Error("Couldn't calculate message size", zap.String("ClientID", s.id), zap.Error(err))
+			return false
+		}
 
 	// ignore any packet with size bigger than negotiated
 	if sz > int(s.packetMaxSize) {

@@ -5,10 +5,9 @@ import (
 	"net"
 	"time"
 
-	"github.com/pkg/errors"
-
 	"github.com/VolantMQ/volantmq/metrics"
 	"github.com/VolantMQ/volantmq/types"
+	"github.com/pkg/errors"
 
 	"github.com/VolantMQ/volantmq/configuration"
 )
@@ -54,6 +53,7 @@ func NewTCP(config *ConfigTCP, internal *InternalConfig) (Provider, error) {
 		l.protocol = "ssl"
 	} else {
 		l.protocol = "tcp"
+
 	}
 
 	l.log = configuration.GetLogger().Named("listener: " + l.protocol + "://:" + config.transport.Port)
@@ -96,7 +96,7 @@ func (l *tcp) Close() error {
 }
 
 func (l *tcp) newConn(cn net.Conn, stat metrics.Bytes) Conn {
-	c := newConn(cn, stat)
+	c := newConn(cn, l.config.GlobalMessageChannel, l.config.GlobalEventChannel, stat)
 
 	if l.tls != nil {
 		c.Conn = tls.Server(cn, l.tls)
@@ -107,6 +107,7 @@ func (l *tcp) newConn(cn net.Conn, stat metrics.Bytes) Conn {
 
 // Serve start serving connections
 func (l *tcp) Serve() error {
+
 	// accept is a channel to signal about next incoming connection Accept()
 	// results.
 	accept := make(chan error, 1)

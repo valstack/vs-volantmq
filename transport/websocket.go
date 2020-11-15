@@ -156,7 +156,7 @@ func (l *ws) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (l *ws) newConn(cn net.Conn, stat metrics.Bytes) Conn {
-	wr := newConn(cn, stat)
+	wr := newConn(cn, l.config.GlobalMessageChannel, l.config.GlobalEventChannel, stat)
 
 	c := &wsConn{
 		conn: wr,

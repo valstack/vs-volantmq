@@ -13,10 +13,15 @@ import (
 // implemented to encapsulate bytes statistic
 type Conn interface {
 	net.Conn
+	GlobalMessageChannel() chan *Message
+	GlobalEventChannel() chan *Event
 }
 
 type conn struct {
 	net.Conn
+	globalMessageChannel chan *Message
+	globalEventChannel   chan *Event
+
 	stat metrics.Bytes
 }
 
@@ -27,13 +32,22 @@ type Handler interface {
 	OnConnection(Conn, *auth.Manager) error
 }
 
-func newConn(cn net.Conn, stat metrics.Bytes) *conn {
+func newConn(cn net.Conn, globalMessageChannel chan *Message, globalEventChannel chan *Event, stat metrics.Bytes) *conn {
 	c := &conn{
-		Conn: cn,
-		stat: stat,
+		Conn:                 cn,
+		globalMessageChannel: globalMessageChannel,
+		globalEventChannel:   globalEventChannel,
+		stat:                 stat,
 	}
 
 	return c
+}
+
+func (c *conn) GlobalMessageChannel() chan *Message {
+	return c.globalMessageChannel
+}
+func (c *conn) GlobalEventChannel() chan *Event {
+	return c.globalEventChannel
 }
 
 // Read ...

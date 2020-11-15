@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -608,24 +609,84 @@ func (s *impl) processIncoming(p mqttp.IFace) error {
 		s.log.Debugf("clientId \"%s\" sent unexpected packet %s for state %s", s.id, p.Type().Name(), s.state.desc())
 		return mqttp.CodeProtocolError
 	}
+	eventsch := s.conn.GlobalEventChannel()
 
 	switch pkt := p.(type) {
 	case *mqttp.Connect:
+		eventsch <- &transport.Event{
+			Username:  s.username,
+			EventType: "Connect",
+		}
 		err = s.onConnect(pkt)
 	case *mqttp.Auth:
+		eventsch <- &transport.Event{
+			Username:  s.username,
+			EventType: "Auth",
+		}
 		resp, err = s.onAuth(pkt)
 	case *mqttp.Publish:
+		eventsch <- &transport.Event{
+			Username:  s.username,
+			EventType: "Publish",
+		}
+		t := pkt.Topic()
+		//Able to set Topic based on User Context
+		userID := string(s.username)
+		parts := strings.Split(userID, "/")
+		pkt.SetTopic(strings.ToLower(parts[0]) + "/" + t)
+		ch := s.conn.GlobalMessageChannel()
+		if ch != nil {
+			ch <- &transport.Message{
+				Username: s.username,
+				Publish:  pkt,
+			}
+		}
+
 		resp, err = s.onPublish(pkt)
+
 	case *mqttp.Ack:
+
+		eventsch <- &transport.Event{
+			Username:  s.username,
+			EventType: "Ack",
+		}
 		resp = s.onAck(pkt)
 	case *mqttp.Subscribe:
 		// [MQTT-2.3.1-1]
 		if id, _ := pkt.ID(); id == 0 {
 			return mqttp.CodeProtocolError
 		}
+		eventsch <- &transport.Event{
+			Username:  s.username,
+			EventType: "Subscribe",
+		}
+		userID := string(s.username)
+		parts := strings.Split(userID, "/")
+
+		pkt.ForEachTopic(func(t *mqttp.Topic) error {
+			s := t.Filter()
+			t.SetFilter([]byte(strings.ToLower(parts[0]) + "/" + s))
+			return nil
+		})
 
 		resp, err = s.SignalSubscribe(pkt)
 	case *mqttp.UnSubscribe:
+		eventsch <- &transport.Event{
+			Username:  s.username,
+			EventType: "UnSubscribe",
+		}
+		//Able to set Topic based on User Context
+		userID := string(s.username)
+		parts := strings.Split(userID, "/")
+
+		pkt.ForEachTopic(func(t *mqttp.Topic) error {
+			s := t.Filter()
+			t.SetFilter([]byte(strings.ToLower(parts[0]) + "/" + s))
+			return nil
+		})
+		if id, _ := pkt.ID(); id == 0 {
+			return mqttp.CodeProtocolError
+		}
 		// [MQTT-2.3.1-1]
 		if id, _ := pkt.ID(); id == 0 {
 			return mqttp.CodeProtocolError
@@ -633,8 +694,13 @@ func (s *impl) processIncoming(p mqttp.IFace) error {
 
 		resp, err = s.SignalUnSubscribe(pkt)
 	case *mqttp.PingReq:
+		//s.log.Infof("PingReq %v", string(s.username))
 		resp = mqttp.NewPingResp(s.version)
 	case *mqttp.Disconnect:
+		eventsch <- &transport.Event{
+			Username:  s.username,
+			EventType: "Disconnect",
+		}
 		if err = s.SignalDisconnect(pkt); err == nil {
 			err = errors.New("disconnect")
 		}

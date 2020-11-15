@@ -6,17 +6,30 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/VolantMQ/vlapi/mqttp"
 	"github.com/VolantMQ/volantmq/auth"
 	"github.com/VolantMQ/volantmq/metrics"
 	"github.com/VolantMQ/volantmq/types"
 )
 
+//Message for any published message
+type Message struct {
+	Publish  *mqttp.Publish
+	Username []byte
+}
+
+type Event struct {
+	EventType string
+	Username  []byte
+}
+
 // Config is base configuration object used by all transports
 type Config struct {
 	// AuthManager
-	AuthManager *auth.Manager
-
-	Host string
+	AuthManager          *auth.Manager
+	GlobalMessageChannel chan *Message
+	GlobalEventChannel   chan *Event
+	Host                 string
 	// Port tcp port to listen on
 	Port string
 }
@@ -75,11 +88,12 @@ func (c *baseConfig) baseReady() error {
 
 // handleConnection is for the broker to handle an incoming connection from a client
 func (c *baseConfig) handleConnection(conn Conn) {
+
 	if c == nil {
 		c.log.Error("Invalid connection type")
 		return
 	}
-
+	c.log.Info("Connection Received %v\n", conn.RemoteAddr())
 	var err error
 
 	defer func() {

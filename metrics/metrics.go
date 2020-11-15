@@ -1,7 +1,6 @@
 package metrics
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -233,7 +232,7 @@ func (t *clients) OnDisconnected(p bool) {
 func (t *clients) OnPersisted(n uint64) {
 	t.Persisted.AddU64(n)
 	t.Total.AddU64(n)
-	fmt.Println("persisted")
+	//	fmt.Println("persisted")
 }
 
 func (t *clients) OnRemoved(n int) {

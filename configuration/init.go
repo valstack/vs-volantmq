@@ -30,7 +30,7 @@ var WorkDir string
 // PluginsDir absolute path to service plugins directory
 var PluginsDir string
 
-func init() {
+func init2() {
 	// initialize startup logger
 	logCfg := zap.NewProductionConfig()
 
@@ -79,6 +79,10 @@ func init() {
 // GetLogger return production logger
 func GetLogger() *zap.SugaredLogger {
 	return cfg.humanLog
+}
+func SetLogger(log *zap.SugaredLogger) {
+	cfg.humanLog = log
+	_ = cfg.humanLog.Sync()
 }
 
 // GetHumanLogger return production logger
