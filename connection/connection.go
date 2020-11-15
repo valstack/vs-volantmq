@@ -913,7 +913,7 @@ func (s *impl) onPublish(pkt *mqttp.Publish) (mqttp.IFace, error) {
 	//   - ignore the message but send acks
 	//   - return error leading to disconnect
 	if !aclPerformed {
-		if e := s.permissions.ACL(s.id, string(s.username), pkt.Topic(), vlauth.AccessWrite); !errors.Is(e, vlauth.StatusAllow) {
+		if _, e := s.permissions.ACL(s.id, string(s.username), pkt.Topic(), vlauth.AccessWrite, pkt.QoS()); !errors.Is(e, vlauth.StatusAllow) {
 			reason = mqttp.CodeNotAuthorized
 		}
 	}

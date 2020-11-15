@@ -96,6 +96,9 @@ github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJy
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/troian/healthcheck v0.1.3 h1:ivUuwGDqbzhXnyyI2E6aczUxBYYAHKC/9Xl3cc+Ew4o=
 github.com/troian/healthcheck v0.1.3/go.mod h1:pP0oMOo7iBmOHY2PCqfaANItDLaYrwHbb97DpOnxhLU=
+github.com/valstack/vs-vlapi v0.6.1-vs-0 h1:NqUcMQtQc7GpOXze6SglFqz1WEB67EimKpewS4uWbdU=
+github.com/valstack/vs-vlapi v0.6.1-vs-0/go.mod h1:xIua5iILFp/FUV8RWyhhkKIdzy0xMJtsQfSHDM9Spuw=
+github.com/valstack/vs-vlapi v0.6.1 h1:XszgG9oLmo24FumOIzHITD0mTH16Ezb64/t0hKXCXKo=
 github.com/vbauerster/mpb/v4 v4.9.4 h1:aGaMDanOSnCZxjaAp09+eSlu3v9Eekpj2oBJ7j+ULL4=
 github.com/vbauerster/mpb/v4 v4.9.4/go.mod h1:xMKSr3w3dixpCH9v7svY4wF3mmhuyWYuYtkpy8T5FOk=
 gitlab.com/VolantMQ/vlplugin/persistence/mem v0.0.7 h1:E2NLgsdnBviLwAxITpwuYVpkdm8M2CVF4HqcL+s2dPs=

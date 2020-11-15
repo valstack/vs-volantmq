@@ -18,3 +18,4 @@ require (
 	golang.org/x/crypto v0.0.0-20190927123631-a832865fa7ad // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200121175148-a6ecf24a6d71
 )
+replace github.com/VolantMQ/vlapi => github.com/valstack/vs-vlapi v0.6.1-vs-0

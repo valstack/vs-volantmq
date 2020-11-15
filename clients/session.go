@@ -146,7 +146,7 @@ func (s *session) SignalSubscribe(pkt *mqttp.Subscribe) (mqttp.IFace, error) {
 
 		var reason mqttp.ReasonCode
 
-		if e := s.permissions.ACL(s.id, s.username, t.Filter(), vlauth.AccessRead); errors.Is(e, vlauth.StatusAllow) {
+		if _, e := s.permissions.ACL(s.id, s.username, t.Filter(), vlauth.AccessRead, mqttp.QoS1); errors.Is(e, vlauth.StatusAllow) {
 			params := vlsubscriber.SubscriptionParams{
 				ID:  subsID,
 				Ops: t.Ops(),
@@ -208,7 +208,7 @@ func (s *session) SignalUnSubscribe(pkt *mqttp.UnSubscribe) (mqttp.IFace, error)
 
 	_ = pkt.ForEachTopic(func(t *mqttp.Topic) error {
 		reason := mqttp.CodeSuccess
-		if e := s.permissions.ACL(s.id, s.username, t.Full(), vlauth.AccessRead); errors.Is(e, vlauth.StatusAllow) {
+		if _, e := s.permissions.ACL(s.id, s.username, t.Full(), vlauth.AccessRead, mqttp.QoS1); errors.Is(e, vlauth.StatusAllow) {
 			if e = s.subscriber.UnSubscribe(t.Full()); e != nil {
 				s.log.Error("unsubscribe from topic", zap.String("clientId", s.id), zap.Error(e))
 				reason = mqttp.CodeNoSubscriptionExisted
